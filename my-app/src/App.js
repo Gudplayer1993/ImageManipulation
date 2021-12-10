@@ -28,7 +28,12 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import { rgbToHex, replace, hexToRGB } from './utils';
-
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import ClearIcon from '@mui/icons-material/Clear';
 
 const drawerWidth = 500;
 
@@ -37,11 +42,27 @@ const palettes = {
   // RGB: [{ R: 255, G: 0, B: 0 },
   // { R: 0, G: 255, B: 0 },
   // { R: 0, G: 0, B: 255 }],
+  none: [
+  ],
   autumn: [
     { R: 0, G: 0, B: 0 },
     { R: 247, G: 136, B: 64 },
     { R: 234, G: 222, B: 222 },
     { R: 184, G: 82, B: 82 }
+  ],
+  winter: [
+    { R: 15, G: 18, B: 37 },
+    { R: 31, G: 65, B: 142 },
+    { R: 173, G: 188, B: 205 },
+    { R: 241, G: 236, B: 230 },
+    { R: 234, G: 219, B: 212 }
+  ],
+  island: [
+    { R: 54, G: 46, B: 35 },
+    { R: 151, G: 142, B: 122 },
+    { R: 202, G: 205, B: 199 },
+    { R: 241, G: 215, B: 195 },
+    { R: 125, G: 163, B: 190 }
   ]
 }
 
@@ -67,23 +88,6 @@ function App() {
       });
     }
   }, [selectedImage, imgOptions, usePalette])
-
-  const theme = createTheme({
-    palette: {
-      primary: {
-        light: '#757ce8',
-        main: '#3f50b5',
-        dark: '#002884',
-        contrastText: '#fff',
-      },
-      secondary: {
-        light: '#ff7961',
-        main: '#f44336',
-        dark: '#ba000d',
-        contrastText: '#000',
-      },
-    },
-  });
 
   const onBtnClick = () => {
     inputFileRef.current.click();
@@ -158,7 +162,7 @@ function App() {
   const debouncedHandlePixelationChange = debounce(handlePixelationChange, 500)
 
   const handleUsePaletteChange = () => {
-    setCurrentPalette([]);
+    setCurrentPalette('');
     setUsePallete(prev => !prev);
   }
 
@@ -175,6 +179,16 @@ function App() {
     const transformedSelectedColor = { R: rgbArr[0], G: rgbArr[1], B: rgbArr[2] }
     let currentPaletteOptions = replace([...imgOptions.palette], index, transformedSelectedColor);
     setImgOptions({ palette: [...currentPaletteOptions] });
+  }
+
+  const handleAddColor = () => {
+    setImgOptions({ palette: [...imgOptions.palette, [{ R: 0, G: 0, B: 0 }]] });
+  }
+
+  const handlePaletteColorDelete = index => {
+    const currentPalette = [...imgOptions.palette];
+    currentPalette.splice(index, 1);
+    setImgOptions({ palette: currentPalette });
   }
 
   const AppBar = styled(MuiAppBar, {
@@ -248,11 +262,11 @@ function App() {
       >
         <DrawerHeader>
           <IconButton onClick={handleDrawerClose}>
-            {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+            <ChevronLeftIcon />
           </IconButton>
         </DrawerHeader>
         <Divider />
-        <Button variant="contained" className="drawerItem" onClick={() => { setSelectedImage(null); setOpen(false); setImgSrc(null); }}>Remove</Button>
+        <Button variant="contained" className="drawerItem" onClick={() => { setSelectedImage(null); setOpen(false); setImgSrc(null); }}>DELETE IMAGE</Button>
         <div className="drawerOptionContainer">
           <div className="drawerOption">
             <Typography gutterBottom>Pixelation</Typography>
@@ -267,12 +281,12 @@ function App() {
               onChange={debouncedHandlePixelationChange}
             />
           </div>
-
+          <Divider />
           <div className="drawerOption">
             <FormGroup>
               <FormControlLabel
                 control={<Switch checked={usePalette} onChange={handleUsePaletteChange} />}
-                label="Show"
+                label="Show Pallete"
               />
             </FormGroup>
             <Collapse in={usePalette}>
@@ -285,14 +299,13 @@ function App() {
                   renderValue={(selected) => {
                     if (selected.length === 0) {
                       return <em>Palette</em>;
+                    } else {
+                      return currentPalette
                     }
                   }}
                   MenuProps={MenuProps}
                   inputProps={{ 'aria-label': 'Without label' }}
                 >
-                  <MenuItem disabled value="">
-                    <em>Placeholder</em>
-                  </MenuItem>
                   {Object.keys(palettes).map(paletteName => (
                     <MenuItem
                       key={paletteName}
@@ -304,16 +317,20 @@ function App() {
                 </Select>
 
               </FormControl>
-            </Collapse>
-            <Collapse in={imgOptions.palette}>
-              {
-                imgOptions.palette.map((color, index) => {
-                  return (<div className="paletteOption">
-                    <Typography>{rgbToHex(color.R, color.G, color.B)}</Typography>
-                    <input type="color" value={rgbToHex(color.R, color.G, color.B)} onChange={event => handleChangePaletteColor(event, index)} />
-                  </div>)
-                })
-              }
+              <List className="paletteColorWrapper">
+                {
+                  imgOptions.palette.map((color, index) => {
+                    return (<ListItem >
+                      <ListItemButton className="paletteOption">
+                        <ListItemText primary={rgbToHex(color.R, color.G, color.B)} />
+                        <input type="color" key={index} value={rgbToHex(color.R, color.G, color.B)} onChange={event => handleChangePaletteColor(event, index)} />
+                        <ClearIcon sx={{ padding: '5px' }} onClick={() => handlePaletteColorDelete(index)} />
+                      </ListItemButton>
+                    </ListItem>)
+                  })
+                }
+                <Button variant="outlined" sx={{ marginTop: '10px' }} onClick={handleAddColor}>Add Color</Button>
+              </List>
             </Collapse>
           </div>
         </div>

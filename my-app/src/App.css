@@ -31,7 +31,17 @@
 }
 
 .paletteOption{
+  padding: 5px 0;
   display:flex;
+  justify-content: space-between;
+}
+
+.paletteOption input{
+  width:100px;
+}
+
+.paletteColorWrapper{
+   padding: 1rem 0;
 }
 
 
