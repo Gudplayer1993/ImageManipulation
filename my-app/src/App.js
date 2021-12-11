@@ -1,4 +1,5 @@
 import uploadIcon from './uploadIcon.png';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
 import './App.css';
 import React, { useState, useEffect, useMemo } from "react";
 import Grow from '@mui/material/Grow';
@@ -31,17 +32,16 @@ import { rgbToHex, replace, hexToRGB } from './utils';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import ClearIcon from '@mui/icons-material/Clear';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import { TabPanel } from './TabPanel';
 
 const drawerWidth = 500;
 
 
 const palettes = {
-  // RGB: [{ R: 255, G: 0, B: 0 },
-  // { R: 0, G: 255, B: 0 },
-  // { R: 0, G: 0, B: 255 }],
   none: [
   ],
   autumn: [
@@ -72,6 +72,8 @@ function App() {
   const [imgSrc, setImgSrc] = useState(null);
   const [loading, setLoading] = useState(false);
   const [usePalette, setUsePallete] = useState(false);
+  const [useEmboss, setUseEmboss] = useState(false);
+  const [currentTab, setCurrentTab] = useState(0);
   const [currentPalette, setCurrentPalette] = useState('');
   const [imgOptions, _setImgOptions] = useState({ pixelate: 1, palette: [] });
 
@@ -191,6 +193,17 @@ function App() {
     setImgOptions({ palette: currentPalette });
   }
 
+  const handleEmbossChange = () => {
+    setUseEmboss(prev => {
+      setImgOptions({ emboss: !prev })
+      return !prev
+    });
+  }
+
+  const handleTabChange = (event, newValue) => {
+    setCurrentTab(newValue);
+  }
+
   const AppBar = styled(MuiAppBar, {
     shouldForwardProp: (prop) => prop !== 'open',
   })(({ theme, open }) => ({
@@ -261,84 +274,108 @@ function App() {
         open={open}
       >
         <DrawerHeader>
+          <Tabs value={currentTab} onChange={handleTabChange} className="tabContainer">
+            <Tab label="Image" />
+            <Tab label="Background" />
+          </Tabs>
           <IconButton onClick={handleDrawerClose}>
             <ChevronLeftIcon />
           </IconButton>
         </DrawerHeader>
         <Divider />
-        <Button variant="contained" className="drawerItem" onClick={() => { setSelectedImage(null); setOpen(false); setImgSrc(null); }}>DELETE IMAGE</Button>
         <div className="drawerOptionContainer">
-          <div className="drawerOption">
-            <Typography gutterBottom>Pixelation</Typography>
-            <Slider
-              aria-label="Temperature"
-              defaultValue={1}
-              valueLabelDisplay="auto"
-              step={1}
-              marks
-              min={1}
-              max={20}
-              onChange={debouncedHandlePixelationChange}
-            />
-          </div>
-          <Divider />
-          <div className="drawerOption">
-            <FormGroup>
-              <FormControlLabel
-                control={<Switch checked={usePalette} onChange={handleUsePaletteChange} />}
-                label="Show Pallete"
-              />
-            </FormGroup>
-            <Collapse in={usePalette}>
-              <FormControl sx={{ m: 1, width: 300, mt: 3 }}>
-                <Select
-                  displayEmpty
-                  value={currentPalette}
-                  onChange={handlePaletteChangeOption}
-                  input={<OutlinedInput />}
-                  renderValue={(selected) => {
-                    if (selected.length === 0) {
-                      return <em>Palette</em>;
-                    } else {
-                      return currentPalette
-                    }
-                  }}
-                  MenuProps={MenuProps}
-                  inputProps={{ 'aria-label': 'Without label' }}
-                >
-                  {Object.keys(palettes).map(paletteName => (
-                    <MenuItem
-                      key={paletteName}
-                      value={paletteName}
-                    >
-                      {paletteName}
-                    </MenuItem>
-                  ))}
-                </Select>
 
-              </FormControl>
-              <List className="paletteColorWrapper">
-                {
-                  imgOptions.palette.map((color, index) => {
-                    return (<ListItem >
-                      <ListItemButton className="paletteOption">
-                        <ListItemText primary={rgbToHex(color.R, color.G, color.B)} />
-                        <input type="color" key={index} value={rgbToHex(color.R, color.G, color.B)} onChange={event => handleChangePaletteColor(event, index)} />
-                        <ClearIcon sx={{ padding: '5px' }} onClick={() => handlePaletteColorDelete(index)} />
-                      </ListItemButton>
-                    </ListItem>)
-                  })
-                }
-                <Button variant="outlined" sx={{ marginTop: '10px' }} onClick={handleAddColor}>Add Color</Button>
-              </List>
-            </Collapse>
-          </div>
+          <TabPanel value={currentTab} index={0}>
+            <div>
+              <div className="drawerOption">
+                <Typography gutterBottom>Pixelation</Typography>
+                <Slider
+                  aria-label="Temperature"
+                  defaultValue={1}
+                  valueLabelDisplay="auto"
+                  step={1}
+                  marks
+                  min={1}
+                  max={20}
+                  onChange={debouncedHandlePixelationChange}
+                />
+              </div>
+              <Divider />
+              <div className="drawerOption">
+                <FormGroup>
+                  <FormControlLabel
+                    control={<Switch checked={useEmboss} onChange={handleEmbossChange} />}
+                    label="Emboss"
+                  />
+                </FormGroup>
+              </div>
+              <Divider />
+              <div className="drawerOption">
+                <FormGroup>
+                  <FormControlLabel
+                    control={<Switch checked={usePalette} onChange={handleUsePaletteChange} />}
+                    label="Show Pallete"
+                  />
+                </FormGroup>
+                <Collapse in={usePalette}>
+                  <FormControl sx={{ m: 1, width: 300, mt: 3 }}>
+                    <Select
+                      displayEmpty
+                      value={currentPalette}
+                      onChange={handlePaletteChangeOption}
+                      input={<OutlinedInput />}
+                      renderValue={(selected) => {
+                        if (selected.length === 0) {
+                          return <em>Palette</em>;
+                        } else {
+                          return currentPalette
+                        }
+                      }}
+                      MenuProps={MenuProps}
+                      inputProps={{ 'aria-label': 'Without label' }}
+                    >
+                      {Object.keys(palettes).map(paletteName => (
+                        <MenuItem
+                          key={paletteName}
+                          value={paletteName}
+                        >
+                          {paletteName}
+                        </MenuItem>
+                      ))}
+                    </Select>
+
+                  </FormControl>
+                  <List className="paletteColorWrapper">
+                    {
+                      imgOptions.palette.map((color, index) => {
+                        return (<ListItem >
+                          <ListItemButton className="paletteOption">
+                            <ListItemText primary={rgbToHex(color.R, color.G, color.B)} />
+                            <input type="color" key={index} value={rgbToHex(color.R, color.G, color.B)} onChange={event => handleChangePaletteColor(event, index)} />
+                            <ClearIcon sx={{ padding: '5px' }} onClick={() => handlePaletteColorDelete(index)} />
+                          </ListItemButton>
+                        </ListItem>)
+                      })
+                    }
+                    <Button variant="outlined" sx={{ marginTop: '10px' }} onClick={handleAddColor}>Add Color</Button>
+                  </List>
+                </Collapse>
+              </div>
+              <Divider />
+            </div>
+            <div className="drawerOption footer">
+              <Button sx={{ width: "100%" }} variant="contained" className="drawerItem" onClick={() => { setSelectedImage(null); setOpen(false); setImgSrc(null); }}>DELETE IMAGE</Button>
+            </div>
+          </TabPanel>
+          <TabPanel value={currentTab} index={1}>
+            BACKGROUND
+          </TabPanel>
         </div>
         <Divider />
       </Drawer>
       <Main className="App-header" open={open}>
-        <Grow in={!selectedImage} className={!selectedImage ? 'render' : 'noRender'}>
-          <img src={uploadIcon} className="App-logo" alt="logo" onClick={onBtnClick} />
+        <Grow in={!selectedImage} className={!selectedImage ? 'render App-logo' : 'noRender'}>
+          <img src={uploadIcon} onClick={onBtnClick} />
         </Grow>
         {renderImage}
         <input

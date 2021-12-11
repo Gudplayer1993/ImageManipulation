@@ -3,10 +3,12 @@
 }
 
 .App-logo {
-  height: 40vmin;
 	box-shadow: 0 0 0 0 rgba(0, 0, 0, 1);
-	transform: scale(0.5);
-	animation: pulse 2s infinite;
+  cursor: pointer
+}
+.App-logo:hover {
+	box-shadow: 0 0 0 0 rgba(0, 0, 0, 1);
+	animation: pulse 3s infinite;
   cursor: pointer
 }
 .drawer-container {
@@ -18,8 +20,22 @@
   align-self: flex-end;
 }
 
+.topOption{
+ flex-grow: 1;
+}
+
+.bottomOption {
+  width:100%;
+  height:100px;
+}
+
 .drawerOptionContainer{
   margin: 2rem;
+  height:100%;
+}
+
+.tabPanel{
+  height:100%;
 }
 
 .drawerOption{
@@ -42,13 +58,6 @@
 
 .paletteColorWrapper{
    padding: 1rem 0;
-}
-
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
 }
 
 .drawerItem {
@@ -75,19 +84,30 @@
   color: #61dafb;
 }
 
+.tabContainer{
+  flex-grow: 1 
+}
+
+.footer{
+  margin-top: auto;
+}
+
+.tabContentContainer{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 @keyframes pulse {
 	0% {
-		transform: scale(0.95);
-		box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
+		transform: scale(1);
 	}
 
-	70% {
-		transform: scale(1);
-		box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+	50% {
+		transform: scale(1.05);
 	}
 
 	100% {
-		transform: scale(0.95);
-		box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+		transform: scale(1);
 	}
 }
